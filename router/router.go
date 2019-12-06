@@ -27,4 +27,5 @@ func init() {
 }
 func setMux() {
 	Mux.HandleFunc("/api/v1/test/index", interceptor(controller.Index))
+	Mux.HandleFunc("/api/v1/tongji/test", interceptor(controller.Test))
 }

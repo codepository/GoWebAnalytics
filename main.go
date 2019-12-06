@@ -7,9 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mumushuiding/go-simple-web-demo/config"
-	"github.com/mumushuiding/go-simple-web-demo/model"
-	"github.com/mumushuiding/go-simple-web-demo/router"
+	"github.com/codepository/GoWebAnalytics/connmgr"
+
+	"github.com/codepository/GoWebAnalytics/config"
+	"github.com/codepository/GoWebAnalytics/model"
+	"github.com/codepository/GoWebAnalytics/router"
 )
 
 var conf = *config.Config
@@ -20,6 +22,8 @@ func main() {
 	model.Setup()
 	// 启动redis连接
 	model.SetRedis()
+	// 连接管理器
+	connmgr.New()
 	// 启动服务
 	readTimeout, err := strconv.Atoi(conf.ReadTimeout)
 	if err != nil {
