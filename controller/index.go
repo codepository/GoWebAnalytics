@@ -4,11 +4,18 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/codepository/GoWebAnalytics/service"
 )
 
 // Index 首页
 func Index(writer http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(writer, "Hello world!")
+}
+
+// Test test
+func Test(writer http.ResponseWriter, request *http.Request) {
+	service.FlushBrowsings2DBFromRedis("2019-12-26")
 }
 
 // GetToken 获取token

@@ -1,9 +1,7 @@
 package model_test
 
 import (
-	"errors"
 	"fmt"
-	"sync"
 	"testing"
 	"time"
 
@@ -17,7 +15,7 @@ type client interface {
 	// HExists 判断是否存在
 	HExists(key, field string) *redis.BoolCmd
 	// HMset 设置值
-	HMSet(key string, fields map[string]interface{}) *redis.StatusCmd
+	HMSet(key string, fields ...interface{}) *redis.BoolCmd
 	// HMGet 获取值
 	HMGet(key string, fields ...string) *redis.SliceCmd
 	// HScan 分页查询
@@ -28,6 +26,9 @@ type client interface {
 	SAdd(key string, members ...interface{}) *redis.IntCmd
 	Watch(fn func(*redis.Tx) error, keys ...string) error
 	Get(key string) *redis.StringCmd
+	HLen(key string) *redis.IntCmd
+	Del(keys ...string) *redis.IntCmd
+	ExpireAt(key string, tm time.Time) *redis.BoolCmd
 }
 type Pageinfo struct {
 	Dm  string `json:"dm"`  // 域名
@@ -85,51 +86,62 @@ func init() {
 // 	c.SAdd("test3", 11)
 // }
 
-func TestWatch(t *testing.T) {
-	const routineCount = 1000
-	increment := func(key string) error {
-		txf := func(tx *redis.Tx) error {
-			n, err := tx.Get(key).Int()
-			if err != nil && err != redis.Nil {
-				return err
-			}
-			n++
-			_, err = tx.Pipelined(func(pipe redis.Pipeliner) error {
-				pipe.Set(key, n, 0)
-				return nil
-			})
-			return err
-		}
-		i := 0
-		j := 0
-		for {
-			i++
-			if i > 2 {
-				time.Sleep(1 * time.Second)
-				j++
-				fmt.Println("沉睡1秒")
-				if j > 100 {
-					break
-				}
-				i = 0
-			}
-			err := c.Watch(txf, key)
-			if err != redis.TxFailedErr {
-				return err
-			}
-		}
-		return errors.New("increment reached maximum number of retries")
-	}
-	var wg sync.WaitGroup
-	wg.Add(routineCount)
-	for i := 0; i < routineCount; i++ {
-		go func() {
-			defer wg.Done()
-			if err := increment("counter3"); err != nil {
-				fmt.Println("increment error:", err)
-			}
-		}()
-	}
-	wg.Wait()
-	fmt.Println("ended with", c.Get("counter3").Val())
+// func TestWatch(t *testing.T) {
+// 	const routineCount = 1000
+// 	increment := func(key string) error {
+// 		txf := func(tx *redis.Tx) error {
+// 			n, err := tx.Get(key).Int()
+// 			if err != nil && err != redis.Nil {
+// 				return err
+// 			}
+// 			n++
+// 			_, err = tx.Pipelined(func(pipe redis.Pipeliner) error {
+// 				pipe.Set(key, n, 0)
+// 				return nil
+// 			})
+// 			return err
+// 		}
+// 		i := 0
+// 		j := 0
+// 		for {
+// 			i++
+// 			if i > 2 {
+// 				time.Sleep(1 * time.Second)
+// 				j++
+// 				fmt.Println("沉睡1秒")
+// 				if j > 100 {
+// 					break
+// 				}
+// 				i = 0
+// 			}
+// 			err := c.Watch(txf, key)
+// 			if err != redis.TxFailedErr {
+// 				return err
+// 			}
+// 		}
+// 		return errors.New("increment reached maximum number of retries")
+// 	}
+// 	var wg sync.WaitGroup
+// 	wg.Add(routineCount)
+// 	for i := 0; i < routineCount; i++ {
+// 		go func() {
+// 			defer wg.Done()
+// 			if err := increment("counter3"); err != nil {
+// 				fmt.Println("increment error:", err)
+// 			}
+// 		}()
+// 	}
+// 	wg.Wait()
+// 	fmt.Println("ended with", c.Get("counter3").Val())
+// }
+// func TestDel(t *testing.T) {
+// 	c.Del("tongji_:" + "*")
+// }
+func TestExpire(t *testing.T) {
+	// d, _ := util.ParseDate(, util.YYYY_MM_DD)
+	// d = d.Add(time.Hour * 24)
+	d := time.Now()
+	d = d.Add(time.Second * 10)
+	fmt.Println(d)
+	c.ExpireAt("tongji_time_localhost_pv", d)
 }

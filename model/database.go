@@ -25,7 +25,7 @@ var conf = *config.Config
 // Setup 初始化一个db连接
 func Setup() {
 	var err error
-	log.Println("数据库初始化！！")
+	log.Println("启动数据库")
 	db, err = gorm.Open(conf.DbType, fmt.Sprintf("%s:%s@(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", conf.DbUser, conf.DbPassword, conf.DbHost, conf.DbPort, conf.DbName))
 	if err != nil {
 		log.Fatalf("数据库连接失败 err: %v", err)
@@ -49,8 +49,11 @@ func Setup() {
 	db.DB().SetMaxOpenConns(open)
 
 	db.Set("gorm:table_options", "ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;").
-		AutoMigrate(&Test{})
-	db.Model(&Test{}).AddIndex("idx_id", "id")
+		AutoMigrate(&Browsing{})
+	db.Set("gorm:table_options", "ENGINE=Innodb DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;").AutoMigrate(&RealtimeWebflow{})
+	db.Set("gorm:table_options", "ENGINE=Innodb DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;").AutoMigrate(&Domainmgr{})
+	db.Set("gorm.table_options", "ENGINE=Innodb DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;").AutoMigrate(&Pageinfo{})
+	db.Set("gorm.table_options", "ENGINE=Innodb DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;").AutoMigrate(&WebFlow{})
 }
 
 // CloseDB closes database connection (unnecessary)

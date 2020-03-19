@@ -26,6 +26,10 @@ func init() {
 	setMux()
 }
 func setMux() {
+	Mux.HandleFunc("/api/v1/test/test", controller.Test)
 	Mux.HandleFunc("/api/v1/test/index", interceptor(controller.Index))
-	Mux.HandleFunc("/api/v1/tongji/test", interceptor(controller.Test))
+	Mux.HandleFunc("/api/v1/tongji/webdata", interceptor(controller.WebData))
+	Mux.HandleFunc("/api/v1/tongji/close", interceptor(controller.CloseWeb))
+	Mux.HandleFunc("/api/v1/tongji/getRealtimeData", interceptor(controller.GetRealtimeData))
+	Mux.HandleFunc("/api/v1/tongji/getTopContent", interceptor(controller.GetTopContent))
 }

@@ -18,3 +18,8 @@ type Pageinfo struct {
 	Author        string `json:"author"`
 	Source        string `json:"source"`
 }
+
+// FirstOrCreate 存在就更新,不存在就创建
+func (p *Pageinfo) FirstOrCreate() error {
+	return db.Where(Pageinfo{URL: p.URL}).FirstOrCreate(p).Error
+}
